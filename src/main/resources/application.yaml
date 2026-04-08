@@ -1,0 +1,19 @@
+server:
+  port: 8091
+
+spring:
+  application:
+    name: TEMPORAL-SERVICE
+
+  temporal:
+    connection:
+      target: localhost:7233      # 7233 is Temporal’s default gRPC port | If you w ere using Docker or a remote server, this would change.
+    namespace: default            # A namespace in Temporal is like a logical environment or partition (dev, prod etc..)
+    workers:
+      - task-queue: SUBCRIPTION_TASK_QUEUE # Workflows and activities assigned to this queue will be picked up here
+        name: subscription-worker # Logical name of the worker (used for logging, metrics, debugging)
+        workflow-thread-pool-size: 100 # Number of threads available to execute Workflow code
+        activity-thread-pool-size: 200 # Number of threads available to execute Activities (I/O tasks)
+
+    workers-auto-discovery:
+      packages: com.example.Temporalservice # Tells Spring to scan this package for: Workflow implementations, Activity implementations

@@ -44,10 +44,10 @@ public class SubscriptionWorkflowImpl implements SubscriptionWorkflow {
 
             status = SubscriptionStatus.WAITING_FOR_TRAIL_TO_END;
             // The Smart Sleep: Wait 10 seconds OR until isCancelled is true
-            Workflow.await(Duration.ofSeconds(20), () -> isCancelled);
+            boolean isFreeTrialFinished = Workflow.await(Duration.ofSeconds(20), () -> isCancelled);
 
             // Decide what to do based on how we woke up
-            if (isCancelled) {
+            if (isFreeTrialFinished || isCancelled) {
                 System.out.println("User cancelled during the trial period! Ending workflow early.");
                 status = SubscriptionStatus.CANCELED_BY_USER;
                 return; // Gracefully exit without sending the welcome email

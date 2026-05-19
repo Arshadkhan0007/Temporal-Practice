@@ -2,6 +2,7 @@ package com.example.TemporalPractice.workflow;
 
 import com.example.TemporalPractice.enums.SubscriptionStatus;
 import com.example.TemporalPractice.activity.SubscriptionActivities;
+import com.example.TemporalPractice.exception.ResourceNotFoundException;
 import io.temporal.activity.ActivityOptions;
 import io.temporal.common.RetryOptions;
 import io.temporal.failure.ActivityFailure;
@@ -24,9 +25,13 @@ public class SubscriptionWorkflowImpl implements SubscriptionWorkflow {
             SubscriptionActivities.class,
             ActivityOptions.newBuilder()
                     .setStartToCloseTimeout(Duration.ofSeconds(10))
-                    .setRetryOptions(RetryOptions.newBuilder()
-                            .setMaximumAttempts(5)
-                            .build())
+                    .setRetryOptions(
+                            RetryOptions.newBuilder()
+                                    .setMaximumAttempts(5)
+                                    .setDoNotRetry(
+                                        ResourceNotFoundException.class.name()
+                                    )
+                                    .build())
                     .build()
     );
 
@@ -48,7 +53,6 @@ public class SubscriptionWorkflowImpl implements SubscriptionWorkflow {
 
             // Decide what to do based on how we woke up
             if (isFreeTrialFinished || isCancelled) {
-                System.out.println("User cancelled during the trial period! Ending workflow early.");
                 status = SubscriptionStatus.CANCELED_BY_USER;
                 return; // Gracefully exit without sending the welcome email
             }

@@ -1,6 +1,7 @@
 package com.example.TemporalPractice.controller;
 
 import com.example.TemporalPractice.workflow.SubscriptionWorkflow;
+import io.temporal.api.enums.v1.WorkflowIdReusePolicy;
 import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowOptions;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +25,8 @@ public class SubscriptionController {
                 WorkflowOptions.newBuilder()
                         .setTaskQueue("SUBSCRIPTION_TASK_QUEUE")
                         .setWorkflowId("sub-" + userId) // Prevents duplicates stubs
+                        .setWorkflowIdReusePolicy(WorkflowIdReusePolicy.WORKFLOW_ID_REUSE_POLICY_REJECT_DUPLICATE)
+                        // If workflow with this ID exists don't start a new one
                         .build());
 
         WorkflowClient.start(workflow::startSubscription, userId, email);
